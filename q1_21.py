@@ -1,32 +1,32 @@
 # ~~~ This is a template for question 1  ~~~
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
-from utils import compare_arrays, integers_list_type_checker
+from utils import compare_arrays, numbers_list_type_checker
 
 # implementation of merge sort
 
 
 class MergeSortImp:
-    def __init__(self, given_array: List[int]) -> None:
+    def __init__(self, given_array: List[Union[int, float]]) -> None:
         """
-        This object gets an array of integers as an input, and sort it according to "Merge Sort" sorting method.
+        This object gets an array of numbers as an input, and sort it according to "Merge Sort" sorting method.
         The main and the only relevant method for external using is named "run". During the sorting process, there is a
         counting of done basic operations.
 
-        :param given_array: List[int].
+        :param given_array: List[Union[int, float]].
         """
-        self.given_array = integers_list_type_checker(given_input=given_array)
+        self.given_array = numbers_list_type_checker(given_input=given_array)
         self.operations_counter = 0
 
-    def _merge(self, array_a: List[int], array_b: List[int]) -> List[int]:
+    def _merge(self, array_a: List[Union[int, float]], array_b: List[Union[int, float]]) -> List[Union[int, float]]:
         """
-        This method takes two sorted arrays of integers and return one sorted array from their elements.
+        This method takes two sorted arrays of numbers and return one sorted array from their elements.
         The sorting process is done according to "Merge" procedure.
 
-        :param array_a: List[int].
-        :param array_b: List[int].
-        :return: List[int].
+        :param array_a: List[Union[int, float]].
+        :param array_b: List[Union[int, float]].
+        :return: List[Union[int, float]].
         """
         final_result = []
 
@@ -49,18 +49,18 @@ class MergeSortImp:
             self.operations_counter += 3
 
         # concat the left part of the non-empty array to the end of the final array
-        # consider the left integers transfers as operations
+        # consider the left numbers transfer as operations
         full_array = final_result + array_a + array_b
         self.operations_counter += len(array_a + array_b)
 
         return full_array
 
-    def _divide_and_conquer(self, array: List[int]) -> List[int]:
+    def _divide_and_conquer(self, array: List[Union[int, float]]) -> List[Union[int, float]]:
         """
         The main recursive implementation of Merge Sort method.
 
-        :param array: List[int].
-        :return: List[int].
+        :param array: List[Union[int, float]].
+        :return: List[Union[int, float]].
         """
         # finish the recursion we've got an array of one element for each element of the input.
         # if checking is a basic operation
@@ -76,7 +76,7 @@ class MergeSortImp:
         # when we have to sorted arrays, create on sorted array from them by using "merge" procedure
         return self._merge(array_a, array_b)
 
-    def run(self) -> Tuple[List[int], int]:
+    def run(self) -> Tuple[List[Union[int, float]], int]:
         """
         :return: The sorted array and the number of the done basic operations.
         """
@@ -85,7 +85,7 @@ class MergeSortImp:
 
 
 # this function gets a list and uses merge sort
-def merge_sort_implementation(_input: List[int]) -> Tuple[List[int], int]:
+def merge_sort_implementation(_input: List[Union[int, float]]) -> Tuple[List[Union[int, float]], int]:
     sorted_array, number_of_basic_operations = MergeSortImp(given_array=_input).run()
     return sorted_array, number_of_basic_operations
 
