@@ -82,49 +82,51 @@ def main(raw_arrays_data: Dict[str, List[Union[int, float]]]) -> pd.DataFrame:
     return df
 
 
-# load data:
+if __name__ == '__main__':
 
-raw_data = read_excel_to_dict(path="data.xlsx")
+    # load data:
 
-# sort data and save results:
+    raw_data = read_excel_to_dict(path="data.xlsx")
 
-final_results = main(raw_arrays_data=raw_data)
+    # sort data and save results:
 
-# merge_sort:
+    final_results = main(raw_arrays_data=raw_data)
 
-merge_sort_final_results = final_results.drop(columns='insertion_sort_counter')
+    # merge_sort:
 
-# insertion sort:
+    merge_sort_final_results = final_results.drop(columns='insertion_sort_counter')
 
-insertion_sort_final_results = final_results.drop(columns='merge_sort_counter')
+    # insertion sort:
 
-# plot figure:
+    insertion_sort_final_results = final_results.drop(columns='merge_sort_counter')
 
-# define basic settings
-plt.figure(figsize=(10, 6))
+    # plot figure:
 
-bar_width = 0.35
-x_indices = np.arange(len(final_results['label']))
+    # define basic settings
+    plt.figure(figsize=(10, 6))
 
-# plotting bars for Merge Sort and Insertion Sort
-plt.bar(x_indices - bar_width/2, final_results['merge_sort_counter'], width=bar_width,
-        color='blue', label='Merge Sort')
-plt.bar(x_indices + bar_width/2, final_results['insertion_sort_counter'], width=bar_width,
-        color='orange', label='Insertion Sort')
+    bar_width = 0.35
+    x_indices = np.arange(len(final_results['label']))
 
-# adding labels and title
-plt.xlabel('Dataset Name')
-plt.ylabel('Number of Basic Operations')
-plt.title('Number of Basic Operations by each Algorithm during the Sorting Process')
-plt.legend()
+    # plotting bars for Merge Sort and Insertion Sort
+    plt.bar(x_indices - bar_width/2, final_results['merge_sort_counter'], width=bar_width,
+            color='blue', label='Merge Sort')
+    plt.bar(x_indices + bar_width/2, final_results['insertion_sort_counter'], width=bar_width,
+            color='orange', label='Insertion Sort')
 
-# setting x-axis ticks and rotating x-axis labels for better readability
-plt.xticks(x_indices, final_results['label'])
-plt.xticks(rotation=45)
+    # adding labels and title
+    plt.xlabel('Dataset Name')
+    plt.ylabel('Number of Basic Operations')
+    plt.title('Number of Basic Operations by each Algorithm during the Sorting Process')
+    plt.legend()
 
-# show plot
-plt.tight_layout()
-plt.show()
+    # setting x-axis ticks and rotating x-axis labels for better readability
+    plt.xticks(x_indices, final_results['label'])
+    plt.xticks(rotation=45)
+
+    # show plot
+    plt.tight_layout()
+    plt.show()
 
 
 
