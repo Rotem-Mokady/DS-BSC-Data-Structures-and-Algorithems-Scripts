@@ -19,14 +19,16 @@ class InsertionSortImp:
         self.given_array = numbers_list_type_checker(given_input=given_array)
         self.operations_counter = 0
 
-    def _insert(self, current_checked_number: int, current_checked_array: List[Union[int, float]]) -> List[Union[int, float]]:
+    def _insert(
+            self, current_checked_number: Union[int, float], current_checked_array: List[Union[int, float]]
+    ) -> List[Union[int, float]]:
         """
         This method takes an number and sorted array, and insert the number to the appropriate index in the sorted
         array that the new array will be als sorted as well.
 
-        :param current_checked_number: int. The number that we want to insert.
-        :param current_checked_array: List[Union[int, float]]. All the numbers on the left of the current checked number
-            in the full array.
+        :param current_checked_number: Union[int, float]. The number that we want to insert.
+        :param current_checked_array: List[Union[int, float]]. All the numbers from the left of the current checked
+            number in the full array.
         :return: List[Union[int, float]]. Sorted array of the checked number and the checked array.
         """
         # iterate the indexes of the array from the right to the left
@@ -65,9 +67,11 @@ class InsertionSortImp:
                 current_checked_number=current_checked_number, current_checked_array=left_array
             )
             # replace the current number and the sorted array from it's left by the new sorted array with both two.
-            # make sure that the two arrays at the same size
+            # make sure that size of the new array is the appropriate size
             if len(copied_array[:idx + 1]) != len(new_sorted_array):
-                raise NotImplemented(f"original ")
+                raise NotImplementedError(
+                    f"original array length: {len(copied_array[:idx + 1])}, new array length: {len(new_sorted_array)}"
+                )
             copied_array[:idx + 1] = new_sorted_array
 
         return copied_array
