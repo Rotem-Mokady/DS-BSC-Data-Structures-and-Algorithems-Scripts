@@ -12,7 +12,6 @@ from q2_21 import insertion_sort_implementation
 
 # functions
 
-
 def _convert_df_to_numbers_array(df: pd.DataFrame) -> List[Union[int, float]]:
     """
     Parse raw data to the sorting function's expected input format.
