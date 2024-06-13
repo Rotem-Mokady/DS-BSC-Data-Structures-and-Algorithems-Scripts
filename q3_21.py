@@ -18,7 +18,7 @@ def _convert_df_to_numbers_array(df: pd.DataFrame) -> List[Union[int, float]]:
     Parse raw data to the sorting function's expected input format.
     """
     if len(df.columns) != 1:
-        raise NotImplemented("the dataframe must include only one field.")
+        raise NotImplementedError("the dataframe must include only one field.")
 
     field_name = df.columns[0]
     numbers_list = df[field_name].tolist()
