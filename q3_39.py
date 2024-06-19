@@ -7,8 +7,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from q1_21 import merge_sort_implementation
-from q2_21 import insertion_sort_implementation
+from q1_39 import merge_sort_implementation
+from q2_39 import insertion_sort_implementation
 
 # functions
 

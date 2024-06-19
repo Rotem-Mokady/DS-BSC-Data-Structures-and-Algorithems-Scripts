@@ -2,9 +2,22 @@
 
 from typing import List, Tuple, Union
 
-from utils import compare_arrays, numbers_list_type_checker
-
 # implementation of merge sort
+
+
+def numbers_list_type_checker(given_input: Any) -> Union[List[int], None]:
+    """
+    make sure that the input is a list of numbers only.
+    """
+    # make sure it's a list
+    if not isinstance(given_input, list):
+        raise TypeError(f"inappropriate input type: {type(given_input).__name__}")
+    # make sure that every element is an integer
+    for elem in given_input:
+        if not isinstance(elem, (int, float)):
+            raise TypeError(f"inappropriate element type: {type(elem).__name__}")
+
+    return given_input
 
 
 class MergeSortImp:
@@ -90,7 +103,11 @@ def merge_sort_implementation(_input: List[Union[int, float]]) -> Tuple[List[Uni
     return sorted_array, number_of_basic_operations
 
 
-if __name__ == '__main__':
+# algorithm sanity check - please ignore
 
-    compare_arrays(total_comparisons=100, array_size=100, sorting_foo=merge_sort_implementation)
+# if __name__ == '__main__':
+#
+#     from utils import compare_arrays
+#
+#     compare_arrays(total_comparisons=100, array_size=100, sorting_foo=merge_sort_implementation)
 
