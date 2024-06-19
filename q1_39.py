@@ -1,6 +1,6 @@
 # ~~~ This is a template for question 1  ~~~
 
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Any
 
 # implementation of merge sort
 
