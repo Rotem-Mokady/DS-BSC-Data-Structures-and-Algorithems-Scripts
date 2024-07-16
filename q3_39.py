@@ -5,7 +5,7 @@ from typing import Union, Tuple
 
 
 NUMBER_TYPE = Union[int, float]
-OPERATION_OUTPUT_TYPE = Union[str, int, Tuple[str, int]]
+OPERATIONS_OUTPUT_TYPE = Union[str, int, Tuple[str, int], Tuple[bool, int]]
 
 # Path for data:
 path = 'Write here the file path, and use is later'
@@ -34,7 +34,7 @@ class HashTable:
         elif collision_handling not in ("Chain", "OA_Double_Hashing", "OA_Quadratic_Probing"):
             raise ValueError(f'inappropriate collision handling: {collision_handling}')
 
-        # check the all m and A params are defined in their correct type
+        # check that all m and A params are defined in their correct type
 
         if not isinstance(m, int):  # check if  m is an int
             raise ValueError('m should be an int')
@@ -49,7 +49,7 @@ class HashTable:
             if not isinstance(A_2, (float, int)):  # check if  A_2 is an float
                 raise ValueError('A_2 should be an float')
 
-        # define all relevant params
+        # define all relevant global params
 
         self.hash_function_method = hash_function_method
         self.collision_handling = collision_handling
@@ -77,34 +77,34 @@ class HashTable:
 
 ### Part A ###
 
-    def hash_function(self, key: NUMBER_TYPE) -> Union[NUMBER_TYPE, None]:
+    def hash_function(self, key: NUMBER_TYPE) -> int:
         """
         Logic of the first hash function, with separation for each chosen hash function method.
         The logic is based on unique m and A global parameters.
 
         :param key: The given key for hashing manipulation.
-        :return: The hash value
+        :return: Hash value.
         """
         if self.hash_function_method == "mod":
             return self.m - key % self.m
         elif self.hash_function_method == "multiplication":
             return int(self.m*(key*self.A-int(key*self.A)))
 
-    def hash_function_2(self, key: NUMBER_TYPE) -> Union[NUMBER_TYPE, None]:
+    def hash_function_2(self, key: NUMBER_TYPE) -> int:
         """
         Logic of the second hash function, with separation for each chosen hash function method.
         The logic is based on unique m and A global parameters (different from those of the first hash function).
         The using might be relevant for OA_Double_Hashing implementation.
 
         :param key: The given key for hashing manipulation.
-        :return: The hash value
+        :return: Hash value.
         """
         if self.hash_function_method == "mod":
             return self.m_2 - key % self.m_2
         elif self.hash_function_method == "multiplication":
             return int(self.m_2*(key*self.A_2-int(key*self.A_2)))
 
-    def insert(self, key=int, value=str) -> OPERATION_OUTPUT_TYPE:
+    def insert(self, key=int, value=str) -> OPERATIONS_OUTPUT_TYPE:
         """
         Logic of insertion operation for a new key and value.
 
@@ -147,7 +147,7 @@ class HashTable:
         # implement 'Chain' method
         elif self.collision_handling == "Chain":
             counter += 1
-            # TODO: why are we skipping the first index (0)?
+            # TODO: why are we skipping the first index (0)? maybe the given key is the first one in the linked list.
             for i in range(1, len(self.keys[place])):
                 counter += 1
 
@@ -202,6 +202,7 @@ class HashTable:
 
             for i in range(1, self.size):
                 counter += 1
+                # TODO: shouldn't it be self.size instead of self.m?
                 new_place = (self.hash_function(key) + i * self.hash_function_2(key)) % self.m
 
                 # Replacing the value if the key is the only key the connected to the new index
@@ -218,13 +219,13 @@ class HashTable:
                     # Returns the amount of operations.
                     return counter
 
-    def delete(self, key=int) -> OPERATION_OUTPUT_TYPE:
+    def delete(self, key=int) -> OPERATIONS_OUTPUT_TYPE:
         """
         Logic of delete operation for a given key that already exists in the table.
 
-        :param key: The key that we want to remove from the table.
-        :return: The number of total operations that have been done during the process (int) or a message of a reason
-        in case of failure (str).
+        :param key: The key that we want to remove.
+        :return: The number of total operations that have been done during the process (int), a message of a reason
+        in case of failure (str) or both of them together (tuple).
         """
         # check if key is an int
         if not isinstance(key, int):
@@ -235,102 +236,175 @@ class HashTable:
         # Get the mapped index based on the chosen hash logic
         place = self.hash_function(key)
 
+        # If we did not have any collision.
         if self.keys[place] == [key]:
+            # TODO: remove, line with no effect
             self.keys[place] == [-1]
+            # change the status of the key to be free
+            self.keys[place] = [-1]
+            # delete the data of the chosen key
             del self.data[place]
-            counter += 1                                #If we did not have any collision.
-            self.num_keys -= 1                          #Update the number of keys in the hash table.
-            return counter                              #Returns the amount of operations.
+            counter += 1
+            # Update the number of keys in the hash table.
+            self.num_keys -= 1
+            # Returns the amount of operations.
+            return counter
 
         elif self.collision_handling == "Chain":
             if self.keys[place] == []:
                 counter += 1
-                return "Data is not in Hash Table", counter  #Data is not in Hash Table, Returns the amount of operations.
-            counter+=1
-            for i in range(1,len(self.keys[place])):
+                # Data is not in the Hash Table and there is nothing to delete. Returns the amount of operations.
+                return "Data is not in Hash Table", counter
+
+            counter += 1
+            # Go over all keys in a specific place in the hash table.
+            # TODO: why are we skipping the first index (0)? maybe the given key is the first one in the linked list.
+            for i in range(1, len(self.keys[place])):
                 counter += 1
                 if self.keys[place][i] == key:
-                    del self.keys[i]                   #Go over all keys in a specific place in the hash table.
+                    # Found and deleted
+                    # TODO: shouldn't it be "del self.keys[place][i]" instead?
+                    del self.keys[i]
                     del self.data[place][i]
-                    self.num_keys -= 1                 #Update the number of keys in the hash table.
-                    return counter                     #Found and deleted, Returns the amount of operations.
-            return "Data is not in Hash Table",counter #Data is not in Hash Table, Returns the amount of operations.
+                    # Update the number of keys in the hash table.
+                    self.num_keys -= 1
+                    # Returns the amount of operations.
+                    return counter
+            # Data is not in the Hash Table and there is nothing to delete. Returns the amount of operations.
+            return "Data is not in Hash Table", counter
 
         elif self.collision_handling == "OA_Quadratic_Probing":
-            counter+=1
+            counter += 1
+
+            # Go over all places the key can be - using OA Quadratic Probing.
             for i in range(1, self.size):
                 counter += 1
+                # TODO: shouldn't be like that? "self.hash_function(place + i * i) % self.size"
                 new_place = self.hash_function(place + i * i)
-                if self.keys[new_place] == []:              #If we have an empty slot, this means that we do not have the key in the table.
+
+                # If we have an empty slot, this means that we do not have the key in the table.
+                if self.keys[new_place] == []:
                     break
+
                 if self.keys[new_place] == [key]:
-                    self.keys[new_place]=-1
-                    del self.data[new_place]                #Go over all places the key can be - using OA Quadratic Probing.
-                    self.num_keys -= 1                      #Update the number of keys in the hash table.
-                    return counter                          #Found and deleted, Returns the amount of operations.
-            return "Data is not in Hash Table",counter      #Data is not in Hash Table, Returns the amount of operations.
+                    # Found and deleted
+                    # TODO: shouldn't it be like that? "self.keys[new_place] = [-1]"
+                    self.keys[new_place] = -1
+                    # TODO: put this line instead of the one above if needed
+                    # self.keys[new_place] = [-1]
+                    # delete the data
+                    del self.data[new_place]
+                    # Update the number of keys in the hash table.
+                    self.num_keys -= 1
+                    # Returns the amount of operations.
+                    return counter
+            # Data is not in the Hash Table and there is nothing to delete. Returns the amount of operations.
+            return "Data is not in Hash Table", counter
 
         elif self.collision_handling == "OA_Double_Hashing":
-            counter+=1
+            counter += 1
+
+            # Go over all places the key can be - using OA Double Hashing.
             for i in range(1, self.size):
                 counter += 1
 
 ###Part C###
-                new_place = '----Replace Me------'
+                new_place = (self.hash_function(key) + i * self.hash_function_2(key)) % self.size
 
-                if self.keys[new_place] == []:              #If we have an empty slot, this means that we do not have the key in the table.
+                # If we have an empty slot, this means that we do not have the key in the table.
+                if self.keys[new_place] == []:
                     break
-                if self.keys[new_place] == [key]:
-                    self.keys[new_place]=-1                #Go over all places the key can be - using OA Double Hashing.
-                    del self.data[new_place]
-                    self.num_keys -= 1                      #Update the number of keys in the hash table.
-                    return counter                          #Found and deleted, Returns the amount of operations.
-            return "Data is not in Hash Table"  ,counter    #Data is not in Hash Table, Returns the amount of operations.
 
-    def member(self, key=int):
-        if not isinstance(key, (int)):  # check if  key is an int
+                if self.keys[new_place] == [key]:
+                    # Found and deleted
+                    # TODO: shouldn't it be like that? "self.keys[new_place] = [-1]"
+                    self.keys[new_place] = -1
+                    # TODO: put this line instead of the one above if needed
+                    # self.keys[new_place] = [-1]
+                    # delete the data
+                    del self.data[new_place]
+                    # Update the number of keys in the hash table.
+                    self.num_keys -= 1
+                    # Returns the amount of operations.
+                    return counter
+            # Data is not in Hash Table, Returns the amount of operations.
+            return "Data is not in Hash Table", counter
+
+    def member(self, key=int) -> OPERATIONS_OUTPUT_TYPE:
+        """
+        Logic of member operation for a given key.
+
+        :param key: The key that we want to check about.
+        :return: True if the key exists and False if it doesn't, plus the number of total operations that have been done
+        during the process (tuple of boolean value and integer value).
+        """
+        # check if  key is an int
+        if not isinstance(key, int):
             raise ValueError('key should be an int')
 
-        counter = 0                                         #We will use the counter later to create our metric of efficiency.
+        # We will use the counter later to create our metric of efficiency.
+        counter = 0
+        # Get the mapped index based on the chosen hash logic
         place = self.hash_function(key)
-        if self.keys[place] == [key]:                       #If we did not have any collision.
+
+        # If we did not have any collision.
+        if self.keys[place] == [key]:
             counter += 1
-            return True, counter                            #Returns True and the amount of operations.
+            # Returns True and the amount of operations.
+            return True, counter
 
         elif self.collision_handling == "Chain":
-            if self.keys[place] == [] or self.keys[place] == [-1] :
+            # if there is no actual data for the given key
+            if self.keys[place] == [] or self.keys[place] == [-1]:
                 counter += 1
-                return False, counter                       #Go over all keys in a specific place in the hash table,
-                                                            #if the key is in it return True and the amount of operations,
-            counter+=1                                      #elsr False and the amount of operations
-            for i in range(1,len(self.keys[place])):
+                return False, counter
+
+            # Go over all keys in a specific place in the hash table
+            # TODO: why are we skipping the first index (0)? maybe the given key is the first one in the linked list.
+            for i in range(1, len(self.keys[place])):
                 counter += 1
+                # if the key is in it return True and the amount of operations
                 if self.keys[place][i] == key:
-                    return True,counter
-            return False,counter
+                    return True, counter
+            # if the key does not exist return False and the amount of operations
+            return False, counter
 
         elif self.collision_handling == "OA_Quadratic_Probing":
-            counter+=1
+            counter += 1
+
+            # Go over all places the key can be - using OA Quadratic Probing,
             for i in range(1, self.size):
 
-                counter += 1                                    #Go over all places the key can be - using OA Quadratic Probing,
-                new_place = self.hash_function(place + i * i)   #if the key is in it return True and the amount of operations,
-                if self.keys[new_place] == []:                  #If we have an empty slot, this means that we do not have the key in the table.
+                counter += 1
+                # TODO: shouldn't be like that? "self.hash_function(place + i * i) % self.size"
+                new_place = self.hash_function(place + i * i)
+
+                # If we have an empty slot, this means that we do not have the key in the table.
+                if self.keys[new_place] == []:
                     break
-                if self.keys[new_place] == [key]:               #else False and the amount of operations.
-                    return True,counter
-            return False,counter
+                # if the key is in it return True and the amount of operations,
+                if self.keys[new_place] == [key]:
+                    return True, counter
+            # if the key does not exist return False and the amount of operations
+            return False, counter
 
         elif self.collision_handling == "OA_Double_Hashing":
-            counter+=1
-            for i in range(1, self.size):                                                          #Go over all places the key can be - using OA Double Hashing,
-                counter += 1                                                                       #if the key is in it return True and the amount of operations,
-                new_place = (self.hash_function(key) + i * self.hash_function_2(key)) % self.m     #else False and the amount of operations.
-                if self.keys[new_place] == []:                                                     #If we have an empty slot, this means that we do not have the key in the table.
+            counter += 1
+            # Go over all places the key can be - using OA Double Hashing
+            for i in range(1, self.size):
+                counter += 1
+                # TODO: shouldn't it be self.size instead of self.m?
+                new_place = (self.hash_function(key) + i * self.hash_function_2(key)) % self.m
+
+                # If we have an empty slot, this means that we do not have the key in the table.
+                if self.keys[new_place] == []:
                     break
+                # if the key is in it return True and the amount of operations
                 if self.keys[new_place] == [key]:
-                    return True,counter
-            return False,counter
+                    return True, counter
+            # if the key does not exist return False and the amount of operations
+            return False, counter
+
 
 def data_hashing(path):
     ###Part D###
