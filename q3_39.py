@@ -1,14 +1,15 @@
 # ~~~ This is a template for question 3  ~~~
 
 # Imports:
-from typing import Union, Tuple
+from typing import Union, Tuple, List, Dict, Any
+import pandas as pd
 
 
 NUMBER_TYPE = Union[int, float]
 OPERATIONS_OUTPUT_TYPE = Union[str, int, Tuple[str, int], Tuple[bool, int]]
 
 # Path for data:
-path = 'Write here the file path, and use is later'
+path = 'data.xlsx'
 
 
 # Implement HashTable class:
@@ -31,7 +32,7 @@ class HashTable:
         if not isinstance(collision_handling, str):  # check if  collision_handling is an str
             raise ValueError('collision_handling should be an str')
         # make sure that collision_handling refers to a real handling type
-        elif collision_handling not in ("Chain", "OA_Double_Hashing", "OA_Quadratic_Probing"):
+        elif collision_handling not in ("Chain", "OA_Quadratic_Probing", "OA_Double_Hashing"):
             raise ValueError(f'inappropriate collision handling: {collision_handling}')
 
         # check that all m and A params are defined in their correct type
@@ -406,10 +407,153 @@ class HashTable:
             return False, counter
 
 
-def data_hashing(path):
-    ###Part D###
-    #data handling
-    pass
-    ###Part E###
-    #efficiency value
-    pass
+class DataSetsHandler:
+    def __init__(self, file_path: str) -> None:
+        """
+        :param file_path: The path of the excel file with the datasets.
+        """
+        self.file_path = file_path
+
+        # make sure that the file has the correct type
+        file_extension = self.file_path.split('.')[-1]
+        if file_extension != 'xlsx':
+            raise ValueError(f"inappropriate dataset file type, {file_extension}")
+
+        # read all the dataframes
+        self.datasets = self._read_excel_to_dict()
+
+    def _read_excel_to_dict(self) -> Dict[str, pd.DataFrame]:
+        """
+        Read the Excel file into a dictionary of dataframes, when the key is the name of the sheet and the value is the
+        table inside the sheet.
+        """
+        xls = pd.ExcelFile(self.file_path)
+        sheets_dict = {
+            sheet_name: pd.read_excel(self.file_path, sheet_name=sheet_name)
+            for sheet_name in xls.sheet_names
+        }
+        return sheets_dict
+
+    @property
+    def _question_d_conf(self) -> List[Dict[str, Any]]:
+        """
+        :return: Configuration that based on the demands of question D.
+        When using our two hash function methods, it's recommended to choose the size to be equal to the 'm' parameter
+        Note that it's actually larger by one because the first index is always 0 and not 1.
+        """
+        return [
+            {
+                'hash_function_method': 'mod', 'collision_handling': 'Chain',
+                'size': 150, 'm': 149, 'A': -1
+            },
+            {
+                'hash_function_method': 'mod', 'collision_handling': 'OA_Quadratic_Probing',
+                'size': 150, 'm': 149, 'A': -1
+            },
+            {
+                'hash_function_method': 'mod', 'collision_handling': 'OA_Double_Hashing',
+                'size': 150, 'm': 149, 'm_2': 97, 'A': -1
+            },
+            {
+                'hash_function_method': 'multiplication', 'collision_handling': 'Chain',
+                'size': 150, 'm': 149, 'A': 0.589
+            },
+            {
+                'hash_function_method': 'multiplication', 'collision_handling': 'OA_Quadratic_Probing',
+                'size': 150, 'm': 149, 'A': 0.589
+            },
+            {
+                'hash_function_method': 'multiplication', 'collision_handling': 'OA_Double_Hashing',
+                'size': 150, 'm': 149, 'm_2': 97, 'A': 0.589, 'A_2': 0.405
+            }
+        ]
+
+    @property
+    def _fields_to_role_convertor(self) -> Dict[str, str]:
+        """
+        Simple mapping between the name of the fields in the datasets and their actual role during the building of the
+        Hash table.
+        """
+        return {'ID': 'key', 'Name': 'value'}
+
+    def _insert_data_to_hash_table(self, df: pd.DataFrame, hash_table: HashTable) -> Tuple[HashTable, int]:
+        """
+        :param df: The dataset that we want to load into the Hash table.
+        :param hash_table: Empty Hash table object.
+        :return: Hash table populated with the new data and plus the number of total operations that have been done
+        during the process.
+        """
+        # prepare the data
+        records = df.rename(self._fields_to_role_convertor, axis=1).to_dict(orient='records')
+        operations_counter = 0
+        # insert each records to it's appropriate place
+        for record in records:
+            current_counter = hash_table.insert(**record)
+            # add the number of done operations for the current record to the total number
+            if isinstance(current_counter, int):
+                operations_counter += current_counter
+        # return populated hash table with total operations number
+        return hash_table, operations_counter
+
+    def hash_tables_generator(self) -> List[Dict[str, Any]]:
+        """
+        The main function of the object.
+        :return: List with the datasets, their Hash tables and their metadata.
+        """
+        # go over each one of the dataframes
+        final_results = []
+        for sheet_name, df in self.datasets.items():
+            df_size = len(df)
+
+            # for each dataframe create all the requested hash tables
+            for idx, sub_conf in enumerate(self._question_d_conf):
+                # create empty hash table
+                initialized_hash_table = HashTable(**sub_conf)
+                # insert data to hash table
+                populated_hash_table, operations_counter = self._insert_data_to_hash_table(
+                    df=df, hash_table=initialized_hash_table
+                )
+                # create final data object of the current sheet and the current hash table
+                results = {
+                    'sheet_name': sheet_name,
+                    'raw_df': df,
+                    'size': df_size,
+                    'hash_table_index': idx + 1,
+                    'hash_table_obj': populated_hash_table,
+                    'hash_function_method': populated_hash_table.hash_function_method,
+                    'collision_handling': populated_hash_table.collision_handling,
+                    'insertion_counted_operations': operations_counter,
+                    'insertion_efficiency_value': round(operations_counter / df_size, 2)
+                }
+                # add it to the final results of all the dataframes with all their hash tables
+                final_results.append(results)
+
+        # return the total results
+        return final_results
+
+    @property
+    def insertion_efficiency_value_necessary_fields(self) -> List[str]:
+        # all the relevant fields for question E
+        return ['sheet_name', 'size', 'hash_function_method', 'collision_handling',
+                'insertion_counted_operations', 'insertion_efficiency_value']
+
+
+def data_hashing(path: str) -> pd.DataFrame:
+    ### Part D ###
+    # data handling
+
+    handler = DataSetsHandler(file_path=path)
+    hash_tables_with_metadata = handler.hash_tables_generator()
+
+    ### Part E ###
+    # create efficiency value table and return it
+
+    results_df = pd.DataFrame(hash_tables_with_metadata)
+    relevant_fields = handler.insertion_efficiency_value_necessary_fields
+
+    insertion_efficiency_value_df = results_df[relevant_fields]
+    return insertion_efficiency_value_df
+
+
+if __name__ == '__main__':
+    data_hashing(path=path)
