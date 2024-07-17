@@ -523,7 +523,7 @@ class DataSetsHandler:
                     'hash_function_method': populated_hash_table.hash_function_method,
                     'collision_handling': populated_hash_table.collision_handling,
                     'insertion_counted_operations': operations_counter,
-                    'insertion_efficiency_value': round(operations_counter / df_size, 2)
+                    'insertion_efficiency_value': round(operations_counter / df_size, 3)
                 }
                 # add it to the final results of all the dataframes with all their hash tables
                 final_results.append(results)
