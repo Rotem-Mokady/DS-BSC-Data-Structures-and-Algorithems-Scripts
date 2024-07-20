@@ -148,22 +148,20 @@ class HashTable:
         # implement 'Chain' method
         elif self.collision_handling == "Chain":
             counter += 1
-            # TODO: why are we skipping the first index (0)? maybe the given key is the first one in the linked list.
-            for i in range(1, len(self.keys[place])):
+            for i in range(len(self.keys[place])):
                 counter += 1
 
                 # Replacing the value if the current key is already exists in the linked list
                 if self.keys[place][i] == key:
                     self.data[place][i] = value
-                    # TODO: why are we adding another key if it's already exists?
-                    self.num_keys += 1
+                    counter += 1
                     # Returns the amount of operations.
                     return counter
 
             # Using 'Chain'.
-            # TODO: shouldn't we add 1 to the counter here?
             self.keys[place].append(key)
             self.data[place].append(value)
+            counter += 1
             self.num_keys += 1
 
             # Returns the amount of operations.
@@ -203,8 +201,7 @@ class HashTable:
 
             for i in range(1, self.size):
                 counter += 1
-                # TODO: shouldn't it be self.size instead of self.m?
-                new_place = (self.hash_function(key) + i * self.hash_function_2(key)) % self.m
+                new_place = (self.hash_function(key) + i * self.hash_function_2(key)) % self.size
 
                 # Replacing the value if the key is the only key the connected to the new index
                 if self.keys[new_place] == [key]:
@@ -239,8 +236,6 @@ class HashTable:
 
         # If we did not have any collision.
         if self.keys[place] == [key]:
-            # TODO: remove, line with no effect
-            self.keys[place] == [-1]
             # change the status of the key to be free
             self.keys[place] = [-1]
             # delete the data of the chosen key
@@ -252,20 +247,18 @@ class HashTable:
             return counter
 
         elif self.collision_handling == "Chain":
-            if self.keys[place] == []:
+            if not self.keys[place]:
                 counter += 1
                 # Data is not in the Hash Table and there is nothing to delete. Returns the amount of operations.
                 return "Data is not in Hash Table", counter
 
             counter += 1
             # Go over all keys in a specific place in the hash table.
-            # TODO: why are we skipping the first index (0)? maybe the given key is the first one in the linked list.
-            for i in range(1, len(self.keys[place])):
+            for i in range(len(self.keys[place])):
                 counter += 1
                 if self.keys[place][i] == key:
                     # Found and deleted
-                    # TODO: shouldn't it be "del self.keys[place][i]" instead?
-                    del self.keys[i]
+                    del self.keys[place][i]
                     del self.data[place][i]
                     # Update the number of keys in the hash table.
                     self.num_keys -= 1
@@ -280,19 +273,15 @@ class HashTable:
             # Go over all places the key can be - using OA Quadratic Probing.
             for i in range(1, self.size):
                 counter += 1
-                # TODO: shouldn't be like that? "self.hash_function(place + i * i) % self.size"
-                new_place = self.hash_function(place + i * i)
+                new_place = self.hash_function(place + i * i) % self.size
 
                 # If we have an empty slot, this means that we do not have the key in the table.
-                if self.keys[new_place] == []:
+                if not self.keys[new_place]:
                     break
 
                 if self.keys[new_place] == [key]:
                     # Found and deleted
-                    # TODO: shouldn't it be like that? "self.keys[new_place] = [-1]"
-                    self.keys[new_place] = -1
-                    # TODO: put this line instead of the one above if needed
-                    # self.keys[new_place] = [-1]
+                    self.keys[new_place] = [-1]
                     # delete the data
                     del self.data[new_place]
                     # Update the number of keys in the hash table.
@@ -318,10 +307,7 @@ class HashTable:
 
                 if self.keys[new_place] == [key]:
                     # Found and deleted
-                    # TODO: shouldn't it be like that? "self.keys[new_place] = [-1]"
-                    self.keys[new_place] = -1
-                    # TODO: put this line instead of the one above if needed
-                    # self.keys[new_place] = [-1]
+                    self.keys[new_place] = [-1]
                     # delete the data
                     del self.data[new_place]
                     # Update the number of keys in the hash table.
@@ -361,8 +347,7 @@ class HashTable:
                 return False, counter
 
             # Go over all keys in a specific place in the hash table
-            # TODO: why are we skipping the first index (0)? maybe the given key is the first one in the linked list.
-            for i in range(1, len(self.keys[place])):
+            for i in range(len(self.keys[place])):
                 counter += 1
                 # if the key is in it return True and the amount of operations
                 if self.keys[place][i] == key:
@@ -377,11 +362,10 @@ class HashTable:
             for i in range(1, self.size):
 
                 counter += 1
-                # TODO: shouldn't be like that? "self.hash_function(place + i * i) % self.size"
-                new_place = self.hash_function(place + i * i)
+                new_place = self.hash_function(place + i * i) % self.size
 
                 # If we have an empty slot, this means that we do not have the key in the table.
-                if self.keys[new_place] == []:
+                if not self.keys[new_place]:
                     break
                 # if the key is in it return True and the amount of operations,
                 if self.keys[new_place] == [key]:
@@ -394,11 +378,10 @@ class HashTable:
             # Go over all places the key can be - using OA Double Hashing
             for i in range(1, self.size):
                 counter += 1
-                # TODO: shouldn't it be self.size instead of self.m?
-                new_place = (self.hash_function(key) + i * self.hash_function_2(key)) % self.m
+                new_place = (self.hash_function(key) + i * self.hash_function_2(key)) % self.size
 
                 # If we have an empty slot, this means that we do not have the key in the table.
-                if self.keys[new_place] == []:
+                if not self.keys[new_place]:
                     break
                 # if the key is in it return True and the amount of operations
                 if self.keys[new_place] == [key]:
