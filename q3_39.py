@@ -391,7 +391,10 @@ class HashTable:
 
 
 class DataSetsHandler:
-    def __init__(self, file_path: str) -> None:
+    def __init__(
+            self, file_path: str, m: int, m_2: Union[int, None] = None, 
+            A: Union[float, None] = None, A_2: Union[float, None] = None
+    ) -> None:
         """
         :param file_path: The path of the excel file with the datasets.
         """
@@ -404,6 +407,11 @@ class DataSetsHandler:
 
         # read all the dataframes
         self.datasets = self._read_excel_to_dict()
+        
+        # define all params for hashing
+        self.m, self.m_2 = m, m_2
+        self.A, self.A_2, self.unnecessary_A = A, A_2, -1
+        self.size = self.m + 1
 
     def _read_excel_to_dict(self) -> Dict[str, pd.DataFrame]:
         """
@@ -427,27 +435,27 @@ class DataSetsHandler:
         return [
             {
                 'hash_function_method': 'mod', 'collision_handling': 'Chain',
-                'size': 150, 'm': 149, 'A': -1
+                'size': self.size, 'm': self.m, 'A': self.unnecessary_A
             },
             {
                 'hash_function_method': 'mod', 'collision_handling': 'OA_Quadratic_Probing',
-                'size': 150, 'm': 149, 'A': -1
+                'size': self.size, 'm': self.m, 'A': self.unnecessary_A
             },
             {
                 'hash_function_method': 'mod', 'collision_handling': 'OA_Double_Hashing',
-                'size': 150, 'm': 149, 'm_2': 97, 'A': -1
+                'size': self.size, 'm': self.m, 'm_2': self.m_2, 'A': self.unnecessary_A
             },
             {
                 'hash_function_method': 'multiplication', 'collision_handling': 'Chain',
-                'size': 150, 'm': 149, 'A': 0.589
+                'size': self.size, 'm': self.m, 'A': self.A
             },
             {
                 'hash_function_method': 'multiplication', 'collision_handling': 'OA_Quadratic_Probing',
-                'size': 150, 'm': 149, 'A': 0.589
+                'size': self.size, 'm': self.m, 'A': self.A
             },
             {
                 'hash_function_method': 'multiplication', 'collision_handling': 'OA_Double_Hashing',
-                'size': 150, 'm': 149, 'm_2': 97, 'A': 0.589, 'A_2': 0.405
+                'size': self.size, 'm': self.m, 'm_2': self.m_2, 'A': self.A, 'A_2': self.A_2
             }
         ]
 
@@ -524,8 +532,9 @@ class DataSetsHandler:
 def data_hashing(path: str) -> pd.DataFrame:
     ### Part D ###
     # data handling
+    m, m_2, A, A_2, = 149, 97, 0.589, 0.405
 
-    handler = DataSetsHandler(file_path=path)
+    handler = DataSetsHandler(file_path=path, m=m, m_2=m_2, A=A, A_2=A_2)
     hash_tables_with_metadata = handler.hash_tables_generator()
 
     ### Part E ###
@@ -538,5 +547,69 @@ def data_hashing(path: str) -> pd.DataFrame:
     return insertion_efficiency_value_df
 
 
+### Part F ###
+
+
+def find_next_prime_numbers(current_number: int, numbers_to_find: int) -> List[int]:
+    """
+    Find all the next prime numbers after a given number.
+    """
+    final_results = []
+    while len(final_results) < numbers_to_find:
+        current_number += 1
+        is_prime = True
+
+        for i in range(2, current_number // 2 + 1):
+            if current_number / i == current_number // i:
+                is_prime = False
+                break
+        if is_prime:
+            final_results.append(current_number)
+
+    return final_results
+
+
+def data_hashing_with_m_choice(path: str, m: int) -> Any:
+    """
+    This method will help us to find a better m param for sheet1 insertion process
+    """
+    # data handling (with m as external input)
+
+    m, m_2, A, A_2, = m, 97, 0.589, 0.405
+
+    handler = DataSetsHandler(file_path=path, m=m, m_2=m_2, A=A, A_2=A_2)
+    hash_tables_with_metadata = handler.hash_tables_generator()
+
+    # create efficiency value table and return it
+
+    results_df = pd.DataFrame(hash_tables_with_metadata)
+    relevant_fields = handler.insertion_efficiency_value_necessary_fields
+    insertion_efficiency_value_df = results_df[relevant_fields]
+
+    # focus on dataset (1) and 'Chain' collision handling results
+
+    sheet_name = f'Sheet1'
+    collision_handling = 'Chain'
+    sheet_data = insertion_efficiency_value_df[
+        (insertion_efficiency_value_df['sheet_name'] == sheet_name) &
+        (insertion_efficiency_value_df['collision_handling'] == collision_handling)
+    ]
+
+    div_result = sheet_data[sheet_data['hash_function_method'] == 'mod'].to_dict(orient='records')[0]
+    mul_result = sheet_data[sheet_data['hash_function_method'] == 'multiplication'].to_dict(orient='records')[0]
+
+    return div_result, mul_result
+
+
 if __name__ == '__main__':
-    data_hashing(path=path)
+    result = data_hashing(path=path)
+
+    next_m_options = find_next_prime_numbers(149, 1000)
+    for m in next_m_options:
+        div, mul = data_hashing_with_m_choice(path=path, m=m)
+        if div['insertion_efficiency_value'] == 1:
+            print(f"*** m: {m}, result div: {div} ***")
+        if mul['insertion_efficiency_value'] == 1:
+            print(f"*** m: {m}, result mul: {mul} ***")
+
+    print("*")
