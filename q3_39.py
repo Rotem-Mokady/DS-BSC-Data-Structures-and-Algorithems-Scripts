@@ -601,15 +601,22 @@ def data_hashing_with_m_choice(path: str, m: int) -> Any:
     return div_result, mul_result
 
 
+def find_the_best_m_for_sheet_1() -> None:
+    # get the next X prime numbers
+    next_m_options = find_next_prime_numbers(149, 200)
+    # run until the insertion efficiency value is perfect
+    for idx, m in enumerate(next_m_options):
+        div, mul = data_hashing_with_m_choice(path=path, m=m)
+
+        if div['insertion_efficiency_value'] == 1:
+            print(f"*** m: {m}, result div: {div}, how many prime numbers from started: {idx + 1}.***")
+            break
+
+        if mul['insertion_efficiency_value'] == 1:
+            print(f"*** m: {m}, result mul: {mul}, how many prime numbers from started: {idx + 1}.***")
+            break
+
+
 if __name__ == '__main__':
     result = data_hashing(path=path)
-
-    next_m_options = find_next_prime_numbers(149, 1000)
-    for m in next_m_options:
-        div, mul = data_hashing_with_m_choice(path=path, m=m)
-        if div['insertion_efficiency_value'] == 1:
-            print(f"*** m: {m}, result div: {div} ***")
-        if mul['insertion_efficiency_value'] == 1:
-            print(f"*** m: {m}, result mul: {mul} ***")
-
-    print("*")
+    find_the_best_m_for_sheet_1()
