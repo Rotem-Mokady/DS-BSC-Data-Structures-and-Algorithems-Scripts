@@ -85,24 +85,3 @@ def Was_an_attack(A=list,n=int,t=float):
                 q.dequeue()
     return 0    # ['There was an attack on second str(XX)',XX,The attack word] ##XX - first second of the attack time
 
-
-# Example usage:
-A1 = [['Shelf', 1.1], ['Shelf', 1.2], ['sheLf', 1.3], ['sheLf', 1.5], ['SHeLF', 0.01], ['NEW USER', 2.5], ['Rating', 5.9]]
-n1 = 5
-t1 = 5
-print(Was_an_attack(A1, n1, t1))  # Output: ['There was an attack on second 0.01', 0.01, 'SHeLF']
-
-A2 = [['Shelf', 6.1], ['Shelf', 1.2], ['sheLf', 1.3], ['sheLf', 1.5], ['SHeLF', 0.01], ['NEW USER', 2.5], ['Rating', 5.9]]
-n2 = 5
-t2 = 5
-print(Was_an_attack(A2, n2, t2))  # Output: 0
-
-A3 = [['Shaf', 6.1], ['Shelf', 1.2], ['sheLf', 1.3], ['sheLf', 1.5], ['SHeLF', 0.01], ['NEW USER', 2.5], ['Rating', 5.9]]
-n3 = 5
-t3 = 5
-print(Was_an_attack(A3, n3, t3))  # Output: 0
-
-A4 = [['NEW USER', 4.1], ['NEW USER', 1.2], ['NEW USER', 1.3], ['NEW USER', 1.5], ['NEW USER', 9.01], ['NEW USER', 2.5], ['Rating', 5.9]]
-n4 = 5
-t4 = 5
-print(Was_an_attack(A4, n4, t4))  # Output: ['There was an attack on second 0.01', 0.01, 'NEW USER']

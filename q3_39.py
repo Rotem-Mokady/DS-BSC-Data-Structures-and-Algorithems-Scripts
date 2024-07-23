@@ -588,7 +588,7 @@ def data_hashing_with_m_choice(path: str, m: int) -> Any:
 
     # focus on dataset (1) and 'Chain' collision handling results
 
-    sheet_name = f'Sheet1'
+    sheet_name = 'Sheet1'
     collision_handling = 'Chain'
     sheet_data = insertion_efficiency_value_df[
         (insertion_efficiency_value_df['sheet_name'] == sheet_name) &
